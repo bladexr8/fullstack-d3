@@ -7,6 +7,7 @@ async function drawScatter() {
   // accessors
   const xAccessor = d => d.dewPoint
   const yAccessor = d => d.humidity
+  const colorAccessor = d => d.cloudCover
 
   // use same dimensions for chart
   // use width or height, whichever
@@ -74,6 +75,11 @@ async function drawScatter() {
       .range([dimensions.boundedHeight, 0])
       .nice()
 
+  // color scale for dots
+  const colorScale = d3.scaleLinear()
+      .domain(d3.extent(dataset, colorAccessor))
+      .range(["skyblue", "darkslategrey"])
+
   // draw chart data
   const dots = bounds.selectAll("circle")
       .data(dataset)
@@ -81,7 +87,7 @@ async function drawScatter() {
       .attr("cx", d => xScale(xAccessor(d)))
       .attr("cy", d => yScale(yAccessor(d)))
       .attr("r", 5)
-      .attr("fill", "cornflowerblue")
+      .attr("fill", d => colorScale(colorAccessor(d)))
   
   // x axis
   const xAxisGenerator = d3.axisBottom()
