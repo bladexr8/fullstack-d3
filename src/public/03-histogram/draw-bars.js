@@ -33,114 +33,115 @@ async function drawBars() {
     - dimensions.margin.top
     - dimensions.margin.bottom
 
-  const wrapper = d3.select("#wrapper")
-    .append("svg")
-      .attr("width", dimensions.width)
-      .attr("height", dimensions.height)
-
-  const bounds = wrapper.append("g")
-    .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`)
-
-  // create xScale
-  const xScale = d3.scaleLinear()
-    .domain(d3.extent(dataset, metricAccessor))
-    .range([0, dimensions.boundedWidth])
-    .nice()
-
-  // create data bins
-  const binsGenerator = d3.bin()
-    .domain(xScale.domain())
-    .value(metricAccessor)
-    .thresholds(12)
-
-  // create the bins
-  // x0 key = lower bound of humidity values
-  // x1 key = upper bound of humidity values
-  const bins = binsGenerator(dataset)
-
-  // create y scale
-  // use d3.max() to 
-  // determine height of bar
-  const yScale = d3.scaleLinear()
-    .domain([0, d3.max(bins, yAccessor)])
-    .range([dimensions.boundedHeight, 0])
-    .nice()
+    const drawHistogram = metric => {
+      const metricAccessor = d => d[metric]
+      const yAccessor = d => d.length
   
-  // draw the data
-
-  // create element to contain bins
-  const binsGroup = bounds.append("g")
-
-  // select all "g" elements within binsGroup
-  // and use .data() to bind bins to the selection
-  // this creates a new <g> element for each
-  // bin
-  const binGroups = binsGroup.selectAll("g")
-    .data(bins)
-    .join("g")
-
-  // padding between bars
-  const barPadding = 1
-
-  // create the bars (one for each bin)
-  const barRects = binGroups.append("rect")
-    .attr("x", d => xScale(d.x0) + barPadding / 2)
-    .attr("y", d => yScale(yAccessor(d)))
-    .attr("width", d => d3.max([0, xScale(d.x1) - xScale(d.x0) - barPadding]))
-    .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
-    .attr("fill", "cornflowerblue")
-
-  // add labels to bars
-  const barText = binGroups.filter(yAccessor)
-    .append("text")
-      .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
-      .attr("y", d => yScale(yAccessor(d)) - 5)
-      .text(yAccessor)
-      .style("text-anchor", "middle")
-      .attr("fill", "darkgrey")
-      .style("font-size", "12px")
-      .style("font-family", "sans-serif")
-
-  // calculate the mean
-  const mean = d3.mean(dataset, metricAccessor)
-
-  // draw the mean line
-  // at the mean humidity level
-  // starting 15px above our chart
-  // ending at x axis
-  const meanLine = bounds.append("line")
-    .attr("x1", xScale(mean))
-    .attr("x2", xScale(mean))
-    .attr("y1", -15)
-    .attr("y2", dimensions.boundedHeight)
-    .attr("stroke", "maroon")
-    .attr("stroke-dasharray", "2px 4px")
-
-  // label for mean
-  const meanLabel = bounds.append("text")
-    .attr("x", xScale(mean))
-    .attr("y", -20)
-    .text("mean")
-    .attr("fill", "maroon")
-    .style("font-size", "12px")
-    .style("text-anchor", "middle")
-
-  // x Axis Generator
-  const xAxisGenerator = d3.axisBottom()
-    .scale(xScale)
-
-  // x Axis
-  const xAxis = bounds.append("g")
-    .call(xAxisGenerator)
-      .style("transform", `translateY(${dimensions.boundedHeight}px)`)
-
-  // x Axis Label
-  const aAxisLabel = xAxis.append("text")
-    .attr("x", dimensions.boundedWidth / 2)
-    .attr("y", dimensions.margin.bottom)
-    .attr("fill", "black")
-    .style("fone-size", "1.4em")
-    .text("Humidity")
+    // 3. Draw canvas
+  
+      const wrapper = d3.select("#wrapper")
+        .append("svg")
+          .attr("width", dimensions.width)
+          .attr("height", dimensions.height)
+  
+      const bounds = wrapper.append("g")
+          .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`)
+  
+    // 4. Create scales
+  
+      const xScale = d3.scaleLinear()
+        .domain(d3.extent(dataset, metricAccessor))
+        .range([0, dimensions.boundedWidth])
+        .nice()
+  
+      const binsGenerator = d3.bin()
+        .domain(xScale.domain())
+        .value(metricAccessor)
+        .thresholds(8)
+  
+      const bins = binsGenerator(dataset)
+  
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(bins, yAccessor)])
+        .range([dimensions.boundedHeight, 0])
+        .nice()
+  
+      // 5. Draw data
+  
+      const binGroups = bounds.selectAll("g")
+        .data(bins)
+        .join("g")
+  
+      const barPadding = 1
+      const barRects = binGroups.append("rect")
+          .attr("x", d => xScale(d.x0) + barPadding / 2)
+          .attr("y", d => yScale(yAccessor(d)))
+          .attr("width", d => d3.max([
+            0,
+            xScale(d.x1) - xScale(d.x0) - barPadding
+          ]))
+          .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
+          .attr("fill", "cornflowerblue")
+  
+      const barText = binGroups.filter(yAccessor)
+        .append("text")
+          .attr("x", d => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
+          .attr("y", d => yScale(yAccessor(d)) - 5)
+          .text(yAccessor)
+          .style("text-anchor", "middle")
+          .attr("fill", "darkgrey")
+          .style("font-size", "12px")
+          .style("font-family", "sans-serif")
+  
+      const mean = d3.mean(dataset, metricAccessor)
+      const meanLine = bounds.append("line")
+          .attr("x1", xScale(mean))
+          .attr("x2", xScale(mean))
+          .attr("y1", -15)
+          .attr("y2", dimensions.boundedHeight)
+          .attr("stroke", "maroon")
+          .attr("stroke-dasharray", "2px 4px")
+  
+      const meanLabel = bounds.append("text")
+          .attr("x", xScale(mean))
+          .attr("y", -20)
+          .text("mean")
+          .attr("fill", "maroon")
+          .style("font-size", "12px")
+          .style("text-anchor", "middle")
+  
+      // 6. Draw peripherals
+  
+      const xAxisGenerator = d3.axisBottom()
+        .scale(xScale)
+  
+      const xAxis = bounds.append("g")
+        .call(xAxisGenerator)
+          .style("transform", `translateY(${dimensions.boundedHeight}px)`)
+  
+      const xAxisLabel = xAxis.append("text")
+          .attr("x", dimensions.boundedWidth / 2)
+          .attr("y", dimensions.margin.bottom - 10)
+          .attr("fill", "black")
+          .style("font-size", "1.4em")
+          .text(metric)
+          .style("text-transform", "capitalize")
+    }
+  
+    const metrics = [
+      "windSpeed",
+      "moonPhase",
+      "dewPoint",
+      "humidity",
+      "uvIndex",
+      "windBearing",
+      "temperatureMin",
+      "temperatureMax",
+      "visibility",
+      "cloudCover",
+    ]
+  
+    metrics.forEach(drawHistogram)
 
   
 
