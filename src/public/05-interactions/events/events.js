@@ -17,6 +17,11 @@ async function createEvent() {
       .attr("fill", "lightgrey")
 
   // your code here
+  rects.on("mouseenter", function(e, datum) {
+    console.log({e, datum})
+    console.log(`***Changing Colour to ${datum}...`)
+    d3.select(e.target).style("fill", datum)
+  })
 
 }
 createEvent()
