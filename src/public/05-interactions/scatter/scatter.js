@@ -97,5 +97,41 @@ async function drawScatter() {
 
   // 7. Set up interactions
 
+  bounds.selectAll("circle")
+    .on("mouseenter", onMouseEnter)
+    .on("mouseleave", onMouseLeave)
+
+  const tooltip = d3.select("#tooltip")
+
+
+  function onMouseEnter(e, datum) {
+    const formatHumidity = d3.format(".2f")
+    tooltip.select("#humidity")
+      .text(formatHumidity(yAccessor(datum)))
+
+    const formatDewPoint = d3.format(".2f")
+    tooltip.select("#dew-point")
+      .text(formatDewPoint(xAccessor(datum)))
+
+    //console.log(datum.date)
+    const dateParser = d3.timeParse("%Y-%m-%d")
+    const formatDate = d3.timeFormat("%B %A %-d, %Y")
+    tooltip.select("#date")
+      .text(formatDate(dateParser(datum.date)))
+    console.log(datum.date)
+    console.log(formatDate(dateParser(datum.date)))
+
+    const x = xScale(xAccessor(datum)) + dimensions.margin.left
+    const y = yScale(yAccessor(datum)) + dimensions.margin.top
+
+    tooltip.style("transform", `translate(calc(-50% + ${x}px), calc(-100% + ${y}px))`)
+
+    tooltip.style("opacity", 1)
+  }
+
+  function onMouseLeave() {
+    tooltip.style("opacity", 0)
+  }
+
 }
 drawScatter()
