@@ -1,8 +1,13 @@
 .wrapper {
+    position: relative;
 }
 
 .bin rect {
     fill: cornflowerblue;
+}
+
+.bin rect:hover {
+    fill: purple
 }
 
 .bin text {

@@ -114,6 +114,56 @@ async function drawBars() {
       .text("Humidity")
 
   // 7. Set up interactions
+  binGroups.select("rect")
+      .on("mouseenter", onMouseEnter)
+      .on("mouseleave", onMouseLeave)
 
+  // get the tooltip
+  const tooltip = d3.select("#tooltip")
+
+  // mouse enter event handler
+  function onMouseEnter(e, datum) {
+    //console.log(`***Mouse Enter [${datum}]`)
+    
+    // update count in tooltip
+    tooltip.select("#count")
+      .text(yAccessor(datum))
+
+    // format humidity values
+    const formatHumidity = d3.format(".2f")
+    
+    // update range in tooltip
+    tooltip.select("#range")
+      .text([
+        formatHumidity(datum.x0),
+        formatHumidity(datum.x1)
+      ].join(" - "))
+
+    // position tooltip
+    const x = xScale(datum.x0)
+      + (xScale(datum.x1) - xScale(datum.x0)) / 2
+      + dimensions.margin.left
+
+    const y = yScale(yAccessor(datum))
+      + dimensions.margin.top
+
+    tooltip.style("transform", `translate(calc(-50% + ${x}px), calc(-100% + ${y}px))`)
+
+    // make tooltip visible
+    tooltip.style("opacity", 1)
+
+  }
+      
+  // mouse leave event handler
+  function onMouseLeave(e, datum) {
+    //console.log(`***Mouse Leave [${datum}]`)
+
+    // hide the tooltip
+    tooltip.style("opacity", 0)
+  }
 }
+
+
+
+
 drawBars()
