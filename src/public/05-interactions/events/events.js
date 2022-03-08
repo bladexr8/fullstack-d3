@@ -22,6 +22,9 @@ async function createEvent() {
     console.log(`***Changing Colour to ${datum}...`)
     d3.select(e.target).style("fill", datum)
   })
+  .on("mouseout", function(e) {
+    d3.select(e.target).style("fill", "lightgrey")
+  })
 
 }
 createEvent()
